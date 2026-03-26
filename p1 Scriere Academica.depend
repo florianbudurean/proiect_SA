@@ -1,0 +1,11 @@
+# depslib dependency file v1.0
+1773312356 source:c:\users\buduf\onedrive\documents\facultate\2026 sii scriere academica\p1 scriere academica\main.cpp
+	<fstream>
+	<iostream>
+
+1774530998 source:c:\users\buduf\onedrive\documents\lucru\facultate\2026 sii scriere academica\p1 scriere academica\main.cpp
+	<iostream>
+	<fstream>
+	<ctime>
+	<cstdlib>
+
