@@ -1,99 +1,105 @@
 #include <iostream>
 #include <fstream>
-#include <ctime>
 #include <cstdlib>
+#include <ctime>
+#include <chrono>
+#include <string>
 
 using namespace std;
 
 /////////////////////////////////////////////////////////////
 void bubbleSort(int* a, int n)
 {
-    for (int i=0; i<n-1; i++)
-    {
-        for (int j=0; j<n-i-1; j++)
-        {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = 0; j < n - i - 1; j++)
             if (a[j] > a[j + 1])
-            {
-                int temp=a[j];
-                a[j]=a[j + 1];
-                a[j + 1]=temp;
-            }
-        }
-    }
+                swap(a[j], a[j + 1]);
 }
 
-//////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 void insertionSort(int* a, int n)
 {
-    for (int i=1; i<n; i++)
+    for (int i = 1; i < n; i++)
     {
-        int k= a[i];
-        int j= i - 1;
-        while (j>=0 and a[j]>k)
+        int k = a[i];
+        int j = i - 1;
+
+        while (j >= 0 && a[j] > k)
         {
-            a[j+1]=a[j];
+            a[j + 1] = a[j];
             j--;
         }
-        a[j+1]=k;
+
+        a[j + 1] = k;
     }
 }
 
-//////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 void countingStep(int* a, int n, int exp)
 {
-    int* out=new int[n];
-    int c[10]={0};
+    int* out = new int[n];
+    int c[10] = {0};
 
-    for (int i=0; i < n; i++)
-        c[(a[i]/exp) % 10]++;
+    for (int i = 0; i < n; i++)
+        c[(a[i] / exp) % 10]++;
 
-    for (int i=1; i < 10; i++)
+    for (int i = 1; i < 10; i++)
         c[i] += c[i - 1];
 
-    for (int i=n - 1; i >= 0; i--)
+    for (int i = n - 1; i >= 0; i--)
     {
-        out[c[(a[i] / exp) % 10] - 1]=a[i];
+        out[c[(a[i] / exp) % 10] - 1] = a[i];
         c[(a[i] / exp) % 10]--;
     }
 
-    for (int i=0; i < n; i++)
-        a[i]=out[i];
+    for (int i = 0; i < n; i++)
+        a[i] = out[i];
 
     delete[] out;
 }
 
 void radixSort(int* a, int n)
 {
-    int m=a[0];
-    for (int i=1; i < n; i++)
-        if (a[i] > m) m=a[i];
+    int m = a[0];
 
-    for (int exp=1; m / exp > 0; exp *= 10)
+    for (int i = 1; i < n; i++)
+        if (a[i] > m)
+            m = a[i];
+
+    for (int exp = 1; m / exp > 0; exp *= 10)
         countingStep(a, n, exp);
 }
 
-//////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 void merge(int* a, int l, int m, int r)
 {
-    int n1=m-l+1;
-    int n2=r-m;
+    int n1 = m - l + 1;
+    int n2 = r - m;
 
-    int* L=new int[n1];
-    int* R=new int[n2];
+    int* L = new int[n1];
+    int* R = new int[n2];
 
-    for (int i=0; i<n1; i++) L[i]=a[l+i];
-    for (int i=0; i<n2; i++) R[i]=a[m+i+1];
+    for (int i = 0; i < n1; i++)
+        L[i] = a[l + i];
 
-    int i=0, j=0, k=l;
+    for (int i = 0; i < n2; i++)
+        R[i] = a[m + i + 1];
 
-    while (i<n1 and j<n2)
+    int i = 0, j = 0, k = l;
+
+    while (i < n1 && j < n2)
     {
-        if (L[i] <= R[j]) a[k++]=L[i++];
-        else a[k++]=R[j++];
+        if (L[i] <= R[j])
+            a[k++] = L[i++];
+        else
+            a[k++] = R[j++];
     }
 
-    while (i<n1) a[k++]=L[i++];
-    while (j<n2) a[k++]=R[j++];
+    while (i < n1)
+        a[k++] = L[i++];
+
+    while (j < n2)
+        a[k++] = R[j++];
 
     delete[] L;
     delete[] R;
@@ -101,233 +107,211 @@ void merge(int* a, int l, int m, int r)
 
 void mergeSort(int* a, int l, int r)
 {
-    if (l<r)
+    if (l < r)
     {
-        int m=(l+r)/2;
+        int m = l + (r - l) / 2;
         mergeSort(a, l, m);
-        mergeSort(a, m+1, r);
+        mergeSort(a, m + 1, r);
         merge(a, l, m, r);
     }
 }
 
-//////////////////////////////////////////////////////////////
-int partition(int* a, int low, int high)
+/////////////////////////////////////////////////////////////
+int partitionArray(int* a, int low, int high)
 {
-    int pivot=a[high];
-    int i=low-1;
+    int pivot = a[high];
+    int i = low - 1;
 
-    for (int j=low; j<high; j++)
+    for (int j = low; j < high; j++)
     {
         if (a[j] < pivot)
         {
             i++;
-            int temp=a[i];
-            a[i]=a[j];
-            a[j]=temp;
+            swap(a[i], a[j]);
         }
     }
 
-    int temp=a[i + 1];
-    a[i+1]=a[high];
-    a[high]=temp;
-
+    swap(a[i + 1], a[high]);
     return i + 1;
 }
 
 void quickSort(int* a, int low, int high)
 {
-    if (low<high)
+    if (low < high)
     {
-        int pi=partition(a, low, high);
-        quickSort(a,low,pi-1);
-        quickSort(a,pi+1,high);
+        int pi = partitionArray(a, low, high);
+        quickSort(a, low, pi - 1);
+        quickSort(a, pi + 1, high);
     }
 }
 
-//////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+void mergeWrapper(int* a, int n)
+{
+    mergeSort(a, 0, n - 1);
+}
+
+void quickWrapper(int* a, int n)
+{
+    quickSort(a, 0, n - 1);
+}
+
+/////////////////////////////////////////////////////////////
+double benchmark(void (*sortFunc)(int*, int), int* original, int n, int runs)
+{
+    using namespace std::chrono;
+
+    double total = 0.0;
+
+    for (int i = 0; i < runs; i++)
+    {
+        int* copy = new int[n];
+
+        for (int j = 0; j < n; j++)
+            copy[j] = original[j];
+
+        auto start = high_resolution_clock::now();
+        sortFunc(copy, n);
+        auto stop = high_resolution_clock::now();
+
+        duration<double> elapsed = stop - start;
+        total += elapsed.count();
+
+        delete[] copy;
+    }
+
+    return total / runs;
+}
+
+/////////////////////////////////////////////////////////////
+void generateListToFile(const string& fileName, int n, int type)
+{
+    ofstream fout(fileName.c_str());
+
+    fout << n << " ";
+
+    if (type == 1) // sortata
+    {
+        int val = rand() % 10;
+        for (int i = 0; i < n; i++)
+        {
+            fout << val << " ";
+            val += rand() % 10;
+        }
+    }
+    else if (type == 2) // nesortata
+    {
+        for (int i = 0; i < n; i++)
+            fout << rand() << " ";
+    }
+    else if (type == 3) // plata
+    {
+        int val = rand() % 10;
+        for (int i = 0; i < n; i++)
+        {
+            fout << val << " ";
+            val += rand() % 2;
+        }
+    }
+
+    fout.close();
+}
+
+int* readListFromFile(const string& fileName, int& n)
+{
+    ifstream fin(fileName.c_str());
+
+    fin >> n;
+
+    int* arr = new int[n];
+    for (int i = 0; i < n; i++)
+        fin >> arr[i];
+
+    fin.close();
+    return arr;
+}
+
+/////////////////////////////////////////////////////////////
 int main()
 {
-    srand(time(0));
+    srand((unsigned)time(0));
 
-    int opt;
-    inceput:
-    cout<<"Bun venit la programul de sortare al matusii Glaia!"<<endl;
-    cout<<"Selectati tipul de lista de generat:"<<endl;
-    cout<<"1. Sortata"<<endl;
-    cout<<"2. Nesortata"<<endl;
-    cout<<"3. Lista plata"<<endl;
-    cout<<"4. Utilizeaza lista precedenta"<<endl;
+    const string inputFile = "in.txt";
 
-    cin>>opt;
-    switch (opt)
+    while (true)
     {
-    case 1: ///lista sortata
-    {
-        int l;
-
-        cout<<"Introduceti lungimea sirului de generat: ";
-        cin>>l;
-
-        ofstream g_out("in.txt");
-        g_out<<l<<" ";
-        int pas=rand()%100;
-        while (pas==0) pas=rand()%10; ///in caz ca se genereaza prima oara 0
-        for (int i=0 ; i < l; i++, pas+= rand()%10 )
-        {
-            g_out<<pas;
-            if (i < l - 1) g_out<<" ";
-        }
-        g_out.close();
-
-        break;
-    }
-    case 2: ///lista nesortata
-    {
-        int l;
-
-        cout<<"Introduceti lungimea sirului de generat: ";
-        cin>>l;
-
-        ofstream g_out("in.txt");
-        g_out<<l<<" ";
-        for (int i=0; i < l; i++)
-        {
-
-            int r=rand();
-            g_out<<r;
-            if (i < l - 1) g_out<<" ";
-        }
-        g_out.close();
-
-        break;
-    }
-    case 3: ///lista plata
-    {
-        int l;
-
-        cout<<"Introduceti lungimea sirului de generat: ";
-        cin>>l;
-
-        ofstream g_out("in.txt");
-        g_out<<l<<" ";
-        int pas=rand()%10;
-        while (pas==0) pas=rand()%10; ///in caz ca se genereaza prima oara 0
-        for (int i=0 ; i < l; i++, pas+= rand()%2 )
-        {
-            g_out<<pas;
-            if (i < l - 1) g_out<<" ";
-        }
-        g_out.close();
-
-        break;
-        break;
-    }
-
-    case 4:
-        {
+        int opt;
+        cout << "Selectati tipul de lista:\n";
+        cout << "1. Sortata\n";
+        cout << "2. Nesortata\n";
+        cout << "3. Lista plata\n";
+        cout << "4. Lista precedenta\n";
+        cout << "0. Iesire\n";
+        cout << "Optiune: ";
+        cin >> opt;
+        ///opt = 2;
+        if (opt == 0)
             break;
+
+        if (opt < 0 || opt > 4)
+        {
+            cout << "Alegeti o optiune valida.\n\n";
+            continue;
         }
-    default:
-    {
-        cout<<"Nu ati ales o optiune valida!";
-        return 1;
-    }
 
-    }
+        if (opt != 4)
+        {
+            int l;
+            cout << "Introduceti lungimea sirului: ";
+            cin >> l;
 
+            if (l <= 0)
+            {
+                cout << "Lungimea trebuie sa fie pozitiva.\n\n";
+                continue;
+            }
 
+            generateListToFile(inputFile, l, opt);
+        }
 
-    ifstream fin("in.txt");
-    if (!fin.is_open())
-    {
-        cout<<"Eroare: in.txt nu a fost gasit."<<endl;
-        return 1;
-    }
+        int n;
+        int* arr = readListFromFile(inputFile, n);
 
-    int n;
-    fin>>n;
+        int runs;
+        cout << "De cate ori sa ruleze fiecare algoritm: ";
+        cin >> runs;
 
-    int* arr=new int[n];
-    for (int i=0; i < n; i++)
-        fin>>arr[i];
-    fin.close();
+        if (runs <= 0)
+        {
+            cout << "Numarul de rulari trebuie sa fie pozitiv.\n\n";
+            delete[] arr;
+            continue;
+        }
 
-    cout<<"Selectati algoritmul de sortare:"<<endl;
-    cout<<"1. Bubble Sort"<<endl;
-    cout<<"2. Insertion Sort"<<endl;
-    cout<<"3. Radix Sort"<<endl;
-    cout<<"4. Merge Sort"<<endl;
-    cout<<"5. Quick Sort"<<endl;
-    cout<<"Optiunea: ";
+        cout << "\nRezultate medii pentru n = " << n << ":\n";
 
+        if (n < 10000)
+            cout << "Bubble:    " << benchmark(bubbleSort, arr, n, runs) << " sec\n";
+        else
+            cout << "Bubble:    netestat, prea multe date\n";
 
-    cin>>opt;
+        if (n <= 75000)
+            cout << "Insertion: " << benchmark(insertionSort, arr, n, runs) << " sec\n";
+        else
+            cout << "Insertion: netestat, prea multe date\n";
 
-    if (opt < 1 or opt > 7)
-    {
-        cout<<"Optiune invalida."<<endl;
+        cout << "Merge:     " << benchmark(mergeWrapper, arr, n, runs) << " sec\n";
+        if ((opt == 1 and n >= 100000) or (opt == 3 and n >= 100000)) cout << "Quick: netestat, anomalie!\n";
+        else cout << "Quick:     " << benchmark(quickWrapper, arr, n, runs) << " sec\n";
+        cout << "Radix:     " << benchmark(radixSort, arr, n, runs) << " sec\n";
+
         delete[] arr;
-        return 1;
+        cout << "\n";
+        cout<<"Apasati Enter pentru a continua...";
+        while(getchar() != '\n');
+        getchar();
+        system("cls");
     }
 
-    switch (opt)
-    {
-
-    case 1:
-    {
-        clock_t start=clock();
-        bubbleSort(arr, n);
-        clock_t stop=clock();
-        cout<<"Timpul utilizat pentru sortare: "<<(int)(stop-start)<<endl;
-        break;
-    }
-    case 2:
-    {
-        clock_t start=clock();
-        insertionSort(arr, n);
-        clock_t stop=clock();
-        cout<<"Timpul utilizat pentru sortare: "<<(int)(stop-start)<<endl;
-        break;
-    }
-    case 3:
-    {
-        clock_t start=clock();
-        radixSort(arr, n);
-        clock_t stop=clock();
-        cout<<"Timpul utilizat pentru sortare: "<<(int)(stop-start)<<endl;
-        break;
-    }
-    case 4:
-    {
-        clock_t start=clock();
-        mergeSort(arr, 0, n - 1);
-        clock_t stop=clock();
-        cout<<"Timpul utilizat pentru sortare: "<<(int)(stop-start)<<endl;
-        break;
-    }
-    case 5:
-    {
-        clock_t start=clock();
-        quickSort(arr, 0, n - 1);
-        clock_t stop=clock();
-        cout<<"Timpul utilizat pentru sortare: "<<(int)(stop-start)<<endl;
-        break;
-    }
-
-    }
-    ofstream fout("out.txt");
-    for (int i=0; i < n; i++)
-    {
-        fout<<arr[i];
-        if (i < n - 1) fout<<" ";
-    }
-    fout.close();
-
-    delete[] arr;
-    printf("Apasati Enter pentru a continua...");
-    while(getchar() != '\n');
-    getchar();
-    system("cls");
-    goto inceput;
     return 0;
 }
